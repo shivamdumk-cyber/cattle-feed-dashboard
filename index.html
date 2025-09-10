@@ -16,7 +16,7 @@
         .dashboard-container {
             display: grid;
             grid-template-columns: 250px 1fr;
-            min-height: 100vh;
+            min-height: 10vh;
         }
         .sidebar {
             background-color: #1f2937;
@@ -448,16 +448,26 @@
 
     <!-- Firebase SDKs -->
     <script type="module">
+        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js"; // Import for Analytics
 
-        // Global variables provided by the canvas environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyDS23spv_ibPdXdzicpfGLOcxN2ynQAZyo",
+          authDomain: "cattle-b2975.firebaseapp.com",
+          projectId: "cattle-b2975",
+          storageBucket: "cattle-b2975.firebasestorage.app",
+          messagingSenderId: "595379331426",
+          appId: "1:595379331426:web:5995628673bf21e7384c3b",
+          measurementId: "G-F6H65S6RE5"
+        };
+        
         // Firebase Initialization
         const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app); // Initialize Analytics
         const db = getFirestore(app);
         const auth = getAuth(app);
         let userId = 'Siddi Vinayak Cattle Feed Centre'; // The user-facing name
@@ -537,7 +547,7 @@
         // Firestore paths
         const getCollectionPath = (collectionName) => {
             const currentUserId = auth.currentUser ? auth.currentUser.uid : 'anonymous';
-            return `artifacts/${appId}/users/${currentUserId}/${collectionName}`;
+            return `artifacts/${firebaseConfig.appId}/users/${currentUserId}/${collectionName}`;
         };
 
         // Navigation logic
