@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siddi Vinayak Cattle Feed Centre Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+        .sidebar {
+            background-color: #1f2937;
+            color: #d1d5db;
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .sidebar-link:hover {
+            background-color: #374151;
+        }
+        .sidebar-link.active {
+            background-color: #4b5563;
+            color: #ffffff;
+        }
+        .main-content {
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        .dashboard-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .data-table th, .data-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .data-table th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            transition: border-color 0.2s ease-in-out;
+        }
+        input:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+        button {
+            background-color: #4b5563;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        button:hover {
+            background-color: #374151;
+        }
+        @media (max-width: 768px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                display: none;
+            }
+            .sidebar.active {
+                display: flex;
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 250px;
+                z-index: 10;
+            }
+        }
+
+        /* Modal specific styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+        }
+
+        .modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body>
+    <!-- Dashboard Main Container -->
+    <div id="dashboard-container" class="dashboard-container">
+        <!-- Mobile menu button -->
+        <div class="md:hidden p-4 bg-gray-800 text-white flex justify-between items-center">
+            <span class="font-semibold text-lg">Dashboard</span>
+            <button id="mobile-menu-toggle">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <h1 class="text-2xl font-bold text-white">Shop Dashboard</h1>
+            <p class="text-sm">User ID: Siddi Vinayak Cattle Feed Centre</p>
+            <div class="mt-8 flex flex-col gap-2">
+                <div class="sidebar-link active" data-target="dashboard">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" /></svg>
+                    Dashboard
+                </div>
+                <div class="sidebar-link" data-target="stock">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1.5a1 1 0 01-2 0V3a1 1 0 011-1zm6 6a1 1 0 011 1v1.5a1 1 0 01-2 0V9a1 1 0 011-1zm-6 6a1 1 0 011 1v1.5a1 1 0 01-2 0v-1.5a1 1 0 011-1zm-6-6a1 1 0 011 1v1.5a1 1 0 01-2 0V9a1 1 0 011-1zM4 14a1 1 0 011 1v1a1 1 0 102 0v-1a1 1 0 10-2 0z" clip-rule="evenodd" /><path d="M13 3a1 1 0 00-1 1v1a1 1 0 01-1 1H9a1 1 0 01-1-1V4a1 1 0 10-2 0v1a3 3 0 003 3h2a3 3 0 003-3V4a1 1 0 00-1-1z" /></svg>
+                    Stock
+                </div>
+                <div class="sidebar-link" data-target="purchases">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm11 9H5a1 1 0 110-2h10a1 1 0 110 2z" /></svg>
+                    Purchases
+                </div>
+                <div class="sidebar-link" data-target="sales">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 00-2 2v6a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm11 9H5a1 1 0 110-2h10a1 1 0 110 2z" /></svg>
+                    Sales
+                </div>
+                <div class="sidebar-link" data-target="customers">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM10 9a3 3 0 00-3 3v1a1 1 0 001 1h6a1 1 0 001-1v-1a3 3 0 00-3-3H10z" /></svg>
+                    Customers
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="dashboard-section">
+                <div class="flex items-center gap-4 mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Overview</h2>
+                    <button id="toggle-profit-btn" class="text-gray-500 hover:text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="item-slicer-dashboard" class="font-medium text-gray-700">Filter by Item:</label>
+                    <select id="item-slicer-dashboard" class="rounded-lg w-64">
+                        <option value="all">All Items</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="dashboard-card">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-600">Total Sales</h3>
+                        <p id="total-sales" class="text-4xl font-bold text-green-600">₹0</p>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-600">Total Purchases</h3>
+                        <p id="total-purchases" class="text-4xl font-bold text-indigo-600">₹0</p>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-600">Total Stock Items</h3>
+                        <p id="total-stock-items" class="text-4xl font-bold text-yellow-600">0</p>
+                    </div>
+                    <!-- Profit Card, now with a unique ID for toggling -->
+                    <div id="profit-card" class="dashboard-card">
+                        <h3 class="text-xl font-semibold mb-2 text-gray-600">Profit</h3>
+                        <p id="total-profit" class="text-4xl font-bold text-gray-800">₹0</p>
+                    </div>
+                </div>
+                <div class="mt-8 dashboard-card">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Recent Activity</h3>
+                    <div class="flex gap-4">
+                        <div class="w-1/2">
+                            <h4 class="text-lg font-semibold mb-2 text-gray-600">Recent Sales</h4>
+                            <div class="overflow-x-auto">
+                                <table class="data-table w-full">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Customer</th>
+                                            <th>Item</th>
+                                            <th>Qty</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recent-sales-table">
+                                        <!-- Recent sales will be dynamically inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="w-1/2">
+                            <h4 class="text-lg font-semibold mb-2 text-gray-600">Recent Purchases</h4>
+                            <div class="overflow-x-auto">
+                                <table class="data-table w-full">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Supplier</th>
+                                            <th>Item</th>
+                                            <th>Qty</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recent-purchases-table">
+                                        <!-- Recent purchases will be dynamically inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock Section -->
+            <div id="stock" class="dashboard-section hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-3xl font-bold text-gray-800">Stock Management</h2>
+                    <button class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-md transition-transform hover:scale-105" onclick="exportTableToCsv('stock-table', 'stock_data.csv')">Export to Excel</button>
+                </div>
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="item-slicer-stock" class="font-medium text-gray-700">Filter by Item:</label>
+                    <select id="item-slicer-stock" class="rounded-lg w-64">
+                        <option value="all">All Items</option>
+                    </select>
+                </div>
+                <div class="dashboard-card">
+                    <div class="overflow-x-auto">
+                        <table class="data-table w-full">
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Stock Available</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stock-table">
+                                <!-- Stock data will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purchases Section -->
+            <div id="purchases" class="dashboard-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Purchases</h2>
+                <div class="dashboard-card mb-6">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Add New Purchase</h3>
+                    <form id="add-purchase-form">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label for="purchase-supplier" class="block text-sm font-medium text-gray-700 mb-1">Supplier</label>
+                                <input type="text" id="purchase-supplier" name="supplier" placeholder="Supplier Name" required class="rounded-lg">
+                            </div>
+                            <div class="form-group">
+                                <label for="purchase-item" class="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
+                                <input type="text" id="purchase-item" name="item" placeholder="Item Name" required class="rounded-lg">
+                            </div>
+                            <div class="form-group">
+                                <label for="purchase-quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                                <input type="number" id="purchase-quantity" name="quantity" placeholder="Quantity" required class="rounded-lg">
+                            </div>
+                            <div class="form-group">
+                                <label for="purchase-price" class="block text-sm font-medium text-gray-700 mb-1">Price per unit</label>
+                                <input type="number" step="0.01" id="purchase-price" name="price" placeholder="Price" required class="rounded-lg">
+                            </div>
+                        </div>
+                        <button type="submit" class="mt-4 px-6 py-2 rounded-lg font-medium text-white shadow-md transition-transform hover:scale-105">Add Purchase</button>
+                    </form>
+                </div>
+                <div class="dashboard-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Purchase History</h3>
+                        <button class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-md transition-transform hover:scale-105" onclick="exportTableToCsv('purchase-history-table', 'purchase_history.csv')">Export to Excel</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="data-table w-full">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Supplier</th>
+                                    <th>Item</th>
+                                    <th>Quantity</th>
+                                    <th>Price (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchase-history-table">
+                                <!-- Purchase history will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Section -->
+            <div id="sales" class="dashboard-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Sales</h2>
+                <div class="dashboard-card mb-6">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Add New Sale</h3>
+                    <form id="add-sale-form">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label for="sale-customer" class="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
+                                <input type="text" id="sale-customer" name="customer" placeholder="Customer Name" required class="rounded-lg">
+                            </div>
+                            <div class="form-group">
+                                <label for="sale-item" class="block text-sm font-medium text-gray-700 mb-1">Item Name</label>
+                                <input type="text" id="sale-item" name="item" placeholder="Item Name" required class="rounded-lg">
+                            </div>
+                            <div class="form-group">
+                                <label for="sale-quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
+                                <input type="number" id="sale-quantity" name="quantity" placeholder="Quantity" required class="rounded-lg">
+                            </div>
+                            <div class="form-group">
+                                <label for="sale-price" class="block text-sm font-medium text-gray-700 mb-1">Price per unit</label>
+                                <input type="number" step="0.01" id="sale-price" name="price" placeholder="Price" required class="rounded-lg">
+                            </div>
+                             <div class="form-group">
+                                <label for="amount-paid" class="block text-sm font-medium text-gray-700 mb-1">Amount Paid</label>
+                                <input type="number" step="0.01" id="amount-paid" name="amountPaid" placeholder="Amount Paid" required class="rounded-lg">
+                            </div>
+                        </div>
+                        <button type="submit" class="mt-4 px-6 py-2 rounded-lg font-medium text-white shadow-md transition-transform hover:scale-105">Add Sale</button>
+                    </form>
+                </div>
+                <div class="dashboard-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Sale History</h3>
+                        <button class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-md transition-transform hover:scale-105" onclick="exportTableToCsv('sale-history-table', 'sale_history.csv')">Export to Excel</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="data-table w-full">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Customer</th>
+                                    <th>Item</th>
+                                    <th>Quantity</th>
+                                    <th>Total Price (₹)</th>
+                                    <th>Amount Paid (₹)</th>
+                                    <th>Credit (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sale-history-table">
+                                <!-- Sale history will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customers Section -->
+            <div id="customers" class="dashboard-section hidden">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Customers</h2>
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="customer-slicer" class="font-medium text-gray-700">Filter by Customer:</label>
+                    <select id="customer-slicer" class="rounded-lg w-64">
+                        <option value="all">All Customers</option>
+                    </select>
+                </div>
+                <div class="flex items-center gap-4 mb-4">
+                    <label for="customer-search-input" class="font-medium text-gray-700">Search:</label>
+                    <input type="text" id="customer-search-input" placeholder="Search by customer name..." class="rounded-lg w-64">
+                </div>
+                <div class="dashboard-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-gray-800">Customer Accounts</h3>
+                        <button class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg shadow-md transition-transform hover:scale-105" onclick="exportTableToCsv('customers-table', 'customer_accounts.csv')">Export to Excel</button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="data-table w-full">
+                            <thead>
+                                <tr>
+                                    <th>Customer Name</th>
+                                    <th>Credit (Amount Owed)</th>
+                                    <th>Debit (Prepaid Amount)</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customers-table">
+                                <!-- Customer data will be dynamically inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg hidden">
+        <span id="toast-message"></span>
+    </div>
+
+    <!-- Modal for adjusting balance -->
+    <div id="adjust-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="text-xl font-semibold mb-4 text-gray-800">Adjust Customer Balance</h3>
+            <div class="form-group">
+                <label for="adjust-amount" class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                <input type="number" step="0.01" id="adjust-amount" placeholder="Enter amount to adjust" class="rounded-lg">
+                <p class="text-xs text-gray-500 mt-1">Use a negative number for credit (money owed to you) and a positive number for debit (money you owe the customer).</p>
+            </div>
+            <div class="flex justify-end gap-4 mt-4">
+                <button id="cancel-adjust" class="bg-gray-400 hover:bg-gray-500 px-4 py-2 rounded-lg font-medium text-white">Cancel</button>
+                <button id="confirm-adjust" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg font-medium text-white">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, onSnapshot, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the canvas environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+
+        // Firebase Initialization
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        let userId = 'Siddi Vinayak Cattle Feed Centre'; // The user-facing name
+        let isAuthReady = false;
+
+        onAuthStateChanged(auth, (user) => {
+            isAuthReady = true;
+            if (user) {
+                // We're authenticated, start listening for data
+                setupListeners();
+            } else {
+                // If not authenticated, sign in anonymously to get a user ID
+                signInAnonymously(auth).then(() => {
+                    // Once signed in, setup listeners
+                    setupListeners();
+                }).catch(error => {
+                    console.error("Anonymous sign-in failed:", error);
+                    showToast("Failed to initialize dashboard. Please try again.");
+                });
+            }
+        });
+
+        // UI Elements
+        const sidebarLinks = document.querySelectorAll('.sidebar-link');
+        const dashboardSections = document.querySelectorAll('.dashboard-section');
+        const purchaseForm = document.getElementById('add-purchase-form');
+        const saleForm = document.getElementById('add-sale-form');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toast-message');
+        const recentSalesTable = document.getElementById('recent-sales-table');
+        const recentPurchasesTable = document.getElementById('recent-purchases-table');
+        const purchaseHistoryTable = document.getElementById('purchase-history-table');
+        const saleHistoryTable = document.getElementById('sale-history-table');
+        const stockTable = document.getElementById('stock-table');
+        const customersTable = document.getElementById('customers-table');
+        const totalSalesEl = document.getElementById('total-sales');
+        const totalPurchasesEl = document.getElementById('total-purchases');
+        const totalStockItemsEl = document.getElementById('total-stock-items');
+        const totalProfitEl = document.getElementById('total-profit');
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+
+        // Profit toggle elements
+        const profitCard = document.getElementById('profit-card');
+        const toggleProfitBtn = document.getElementById('toggle-profit-btn');
+
+        // Modal Elements
+        const adjustModal = document.getElementById('adjust-modal');
+        const adjustAmountInput = document.getElementById('adjust-amount');
+        const cancelAdjustBtn = document.getElementById('cancel-adjust');
+        const confirmAdjustBtn = document.getElementById('confirm-adjust');
+        let currentCustomerId = null;
+
+        // Slicer and Search Elements
+        const itemSlicerDashboard = document.getElementById('item-slicer-dashboard');
+        const itemSlicerStock = document.getElementById('item-slicer-stock');
+        const customerSlicer = document.getElementById('customer-slicer');
+        const customerSearchInput = document.getElementById('customer-search-input');
+
+        // Data arrays
+        let allPurchases = [];
+        let allSales = [];
+        let allCustomers = [];
+        let allItems = new Set();
+        let selectedItem = 'all';
+        let selectedCustomer = 'all';
+
+        // Show toast message
+        function showToast(message) {
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Firestore paths
+        const getCollectionPath = (collectionName) => {
+            const currentUserId = auth.currentUser ? auth.currentUser.uid : 'anonymous';
+            return `artifacts/${appId}/users/${currentUserId}/${collectionName}`;
+        };
+
+        // Navigation logic
+        sidebarLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                const target = link.dataset.target;
+                
+                sidebarLinks.forEach(item => item.classList.remove('active'));
+                link.classList.add('active');
+
+                dashboardSections.forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                document.getElementById(target).classList.remove('hidden');
+
+                // Re-render data for the new view
+                if (target === 'dashboard') {
+                    renderDashboard(allPurchases, allSales);
+                } else if (target === 'stock') {
+                    renderStock(allPurchases, allSales);
+                } else if (target === 'customers') {
+                    // Reset customer slicer and search when navigating to the section
+                    customerSlicer.value = 'all';
+                    selectedCustomer = 'all';
+                    customerSearchInput.value = '';
+                    renderCustomers(allCustomers);
+                }
+
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+
+        mobileMenuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Slicer logic
+        itemSlicerDashboard.addEventListener('change', (e) => {
+            selectedItem = e.target.value;
+            renderDashboard(allPurchases, allSales);
+        });
+
+        itemSlicerStock.addEventListener('change', (e) => {
+            selectedItem = e.target.value;
+            renderStock(allPurchases, allSales);
+        });
+        
+        // New: Customer slicer and search logic
+        customerSlicer.addEventListener('change', () => {
+            customerSearchInput.value = ''; // Clear search when using dropdown
+            selectedCustomer = customerSlicer.value;
+            renderCustomers(allCustomers);
+        });
+        
+        customerSearchInput.addEventListener('input', () => {
+            customerSlicer.value = 'all'; // Clear dropdown when using search
+            selectedCustomer = 'all';
+            renderCustomers(allCustomers);
+        });
+
+        // Profit toggle logic
+        toggleProfitBtn.addEventListener('click', () => {
+            const isHidden = profitCard.classList.toggle('hidden');
+            localStorage.setItem('showProfit', !isHidden);
+        });
+
+        function setupListeners() {
+            if (!isAuthReady) {
+                console.log("Authentication not ready, skipping Firestore listener setup.");
+                return;
+            }
+
+            // Check local storage for profit card visibility preference
+            const showProfit = localStorage.getItem('showProfit');
+            if (showProfit === 'false') {
+                profitCard.classList.add('hidden');
+            } else {
+                profitCard.classList.remove('hidden');
+            }
+
+            // Purchases listener
+            onSnapshot(collection(db, getCollectionPath('purchases')), (snapshot) => {
+                allPurchases = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateAllItems(allPurchases, allSales);
+                renderPurchases(allPurchases);
+                renderDashboard(allPurchases, allSales);
+                renderStock(allPurchases, allSales);
+            }, (error) => {
+                console.error("Error listening to purchases: ", error);
+                showToast("Error loading purchases data.");
+            });
+
+            // Sales listener
+            onSnapshot(collection(db, getCollectionPath('sales')), (snapshot) => {
+                allSales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                updateAllItems(allPurchases, allSales);
+                renderSales(allSales);
+                renderDashboard(allPurchases, allSales);
+                renderStock(allPurchases, allSales);
+            }, (error) => {
+                console.error("Error listening to sales: ", error);
+                showToast("Error loading sales data.");
+            });
+
+            // Customers listener
+            onSnapshot(collection(db, getCollectionPath('customers')), (snapshot) => {
+                allCustomers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                populateCustomerSlicer(allCustomers);
+                renderCustomers(allCustomers);
+            }, (error) => {
+                console.error("Error listening to customers: ", error);
+                showToast("Error loading customer data.");
+            });
+        }
+        
+        // Update item dropdowns
+        function updateAllItems(purchases, sales) {
+            const items = new Set();
+            items.add("all");
+            purchases.forEach(p => items.add(p.item));
+            sales.forEach(s => items.add(s.item));
+
+            if (JSON.stringify(Array.from(items)) !== JSON.stringify(Array.from(allItems))) {
+                allItems = items;
+                itemSlicerDashboard.innerHTML = '';
+                itemSlicerStock.innerHTML = '';
+                allItems.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item === 'all' ? 'All Items' : item;
+                    itemSlicerDashboard.appendChild(option);
+
+                    const stockOption = document.createElement('option');
+                    stockOption.value = item;
+                    stockOption.textContent = item === 'all' ? 'All Items' : item;
+                    itemSlicerStock.appendChild(stockOption);
+                });
+            }
+        }
+        
+        // New: Populate customer slicer dropdown
+        function populateCustomerSlicer(customers) {
+            const fragment = document.createDocumentFragment();
+            const allOption = document.createElement('option');
+            allOption.value = 'all';
+            allOption.textContent = 'All Customers';
+            fragment.appendChild(allOption);
+
+            customers.forEach(customer => {
+                const option = document.createElement('option');
+                option.value = customer.id;
+                option.textContent = customer.name;
+                fragment.appendChild(option);
+            });
+            customerSlicer.innerHTML = '';
+            customerSlicer.appendChild(fragment);
+            // Re-select the previously selected customer
+            customerSlicer.value = selectedCustomer;
+        }
+
+        function renderDashboard(purchases, sales) {
+            let filteredPurchases = selectedItem === 'all' ? purchases : purchases.filter(p => p.item === selectedItem);
+            let filteredSales = selectedItem === 'all' ? sales : sales.filter(s => s.item === selectedItem);
+            
+            let totalSales = filteredSales.reduce((sum, s) => sum + (s.price * s.quantity), 0);
+            let totalPurchases = filteredPurchases.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+            let totalProfit = totalSales - totalPurchases;
+
+            totalSalesEl.textContent = `₹${totalSales.toFixed(2)}`;
+            totalPurchasesEl.textContent = `₹${totalPurchases.toFixed(2)}`;
+            totalProfitEl.textContent = `₹${totalProfit.toFixed(2)}`;
+
+            recentSalesTable.innerHTML = '';
+            filteredSales.sort((a, b) => b.date.seconds - a.date.sconds).slice(0, 5).forEach(s => {
+                const row = `<tr>
+                    <td>${new Date(s.date.seconds * 1000).toLocaleDateString()}</td>
+                    <td>${s.customer}</td>
+                    <td>${s.item}</td>
+                    <td>${s.quantity}</td>
+                </tr>`;
+                recentSalesTable.innerHTML += row;
+            });
+
+            recentPurchasesTable.innerHTML = '';
+            filteredPurchases.sort((a, b) => b.date.seconds - a.date.seconds).slice(0, 5).forEach(p => {
+                const row = `<tr>
+                    <td>${new Date(p.date.seconds * 1000).toLocaleDateString()}</td>
+                    <td>${p.supplier}</td>
+                    <td>${p.item}</td>
+                    <td>${p.quantity}</td>
+                </tr>`;
+                recentPurchasesTable.innerHTML += row;
+            });
+        }
+
+        function renderStock(purchases, sales) {
+            let filteredPurchases = selectedItem === 'all' ? purchases : purchases.filter(p => p.item === selectedItem);
+            let filteredSales = selectedItem === 'all' ? sales : sales.filter(s => s.item === selectedItem);
+
+            const stock = {};
+            filteredPurchases.forEach(p => {
+                stock[p.item] = (stock[p.item] || 0) + p.quantity;
+            });
+            filteredSales.forEach(s => {
+                stock[s.item] = (stock[s.item] || 0) - s.quantity;
+            });
+
+            stockTable.innerHTML = '';
+            let totalItems = 0;
+            for (const item in stock) {
+                totalItems++;
+                const row = `<tr>
+                    <td>${item}</td>
+                    <td>${stock[item]}</td>
+                </tr>`;
+                stockTable.innerHTML += row;
+            }
+            totalStockItemsEl.textContent = totalItems;
+        }
+
+
+        function renderPurchases(purchases) {
+            purchaseHistoryTable.innerHTML = '';
+            purchases.sort((a, b) => b.date.seconds - a.date.seconds).forEach((p) => {
+                const row = `<tr>
+                    <td>${new Date(p.date.seconds * 1000).toLocaleDateString()}</td>
+                    <td>${p.supplier}</td>
+                    <td>${p.item}</td>
+                    <td>${p.quantity}</td>
+                    <td>₹${(p.price * p.quantity).toFixed(2)}</td>
+                </tr>`;
+                purchaseHistoryTable.innerHTML += row;
+            });
+        }
+
+        function renderSales(sales) {
+            saleHistoryTable.innerHTML = '';
+            sales.sort((a, b) => b.date.seconds - a.date.seconds).forEach((s) => {
+                const row = `<tr>
+                    <td>${new Date(s.date.seconds * 1000).toLocaleDateString()}</td>
+                    <td>${s.customer}</td>
+                    <td>${s.item}</td>
+                    <td>${s.quantity}</td>
+                    <td>₹${(s.price * s.quantity).toFixed(2)}</td>
+                    <td>₹${s.amountPaid.toFixed(2)}</td>
+                    <td>₹${s.creditAmount.toFixed(2)}</td>
+                </tr>`;
+                saleHistoryTable.innerHTML += row;
+            });
+        }
+
+        // Updated renderCustomers function to handle filtering and searching
+        function renderCustomers(customers) {
+            customersTable.innerHTML = '';
+            
+            let filteredCustomers = customers;
+
+            // Apply dropdown filter first
+            if (selectedCustomer !== 'all') {
+                filteredCustomers = customers.filter(c => c.id === selectedCustomer);
+            }
+            
+            // Apply search filter
+            const searchTerm = customerSearchInput.value.toLowerCase();
+            if (searchTerm) {
+                filteredCustomers = filteredCustomers.filter(c => c.name.toLowerCase().includes(searchTerm));
+            }
+
+            filteredCustomers.forEach(c => {
+                const credit = c.credit ? c.credit.toFixed(2) : '0.00';
+                const debit = c.debit ? c.debit.toFixed(2) : '0.00';
+                const row = `<tr id="customer-${c.id}">
+                    <td>${c.name}</td>
+                    <td class="text-red-500">₹${credit}</td>
+                    <td class="text-green-500">₹${debit}</td>
+                    <td>
+                        <button class="bg-indigo-500 text-white px-3 py-1 text-sm rounded-md" onclick="openAdjustModal('${c.id}')">Adjust</button>
+                    </td>
+                </tr>`;
+                customersTable.innerHTML += row;
+            });
+        }
+
+        // Add purchase
+        purchaseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(purchaseForm);
+            const purchaseData = {
+                supplier: formData.get('supplier'),
+                item: formData.get('item'),
+                quantity: parseInt(formData.get('quantity')),
+                price: parseFloat(formData.get('price')),
+                date: new Date(),
+                userId: auth.currentUser.uid
+            };
+            try {
+                await addDoc(collection(db, getCollectionPath('purchases')), purchaseData);
+                showToast("Purchase added successfully!");
+                purchaseForm.reset();
+            } catch (error) {
+                console.error("Error adding purchase: ", error);
+                showToast("Failed to add purchase. Please try again.");
+            }
+        });
+
+        // Add sale
+        saleForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(saleForm);
+            const totalSalePrice = parseFloat(formData.get('price')) * parseInt(formData.get('quantity'));
+            const amountPaid = parseFloat(formData.get('amountPaid'));
+            const creditAmount = totalSalePrice - amountPaid;
+
+            const saleData = {
+                customer: formData.get('customer'),
+                item: formData.get('item'),
+                quantity: parseInt(formData.get('quantity')),
+                price: parseFloat(formData.get('price')),
+                amountPaid: amountPaid,
+                creditAmount: creditAmount,
+                date: new Date(),
+                userId: auth.currentUser.uid
+            };
+            
+            try {
+                await addDoc(collection(db, getCollectionPath('sales')), saleData);
+                showToast("Sale added successfully!");
+                saleForm.reset();
+
+                // Update customer balance if credit is due
+                const customersRef = collection(db, getCollectionPath('customers'));
+                const q = query(customersRef, where("name", "==", saleData.customer));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    // Customer doesn't exist, create a new one
+                    await addDoc(customersRef, {
+                        name: saleData.customer,
+                        credit: creditAmount,
+                        debit: 0,
+                        userId: auth.currentUser.uid
+                    });
+                } else {
+                    // Customer exists, update credit
+                    const customerDoc = querySnapshot.docs[0];
+                    const currentCredit = customerDoc.data().credit || 0;
+                    const newCredit = (currentCredit + creditAmount);
+                    
+                    await updateDoc(doc(customersRef, customerDoc.id), {
+                        credit: newCredit
+                    });
+                }
+            } catch (error) {
+                console.error("Error adding sale: ", error);
+                showToast("Failed to add sale. Please try again.");
+            }
+        });
+
+        // Modal functions
+        window.openAdjustModal = (customerId) => {
+            currentCustomerId = customerId;
+            adjustModal.classList.remove('hidden');
+        };
+
+        cancelAdjustBtn.addEventListener('click', () => {
+            adjustModal.classList.add('hidden');
+            adjustAmountInput.value = '';
+        });
+
+        confirmAdjustBtn.addEventListener('click', async () => {
+            const amount = parseFloat(adjustAmountInput.value);
+            if (isNaN(amount)) {
+                showToast("Please enter a valid number.");
+                return;
+            }
+            
+            const customersRef = collection(db, getCollectionPath('customers'));
+            const customerDocRef = doc(customersRef, currentCustomerId);
+
+            try {
+                const customerDoc = await getDoc(customerDocRef);
+                const currentData = customerDoc.data();
+                
+                const newCredit = (currentData.credit || 0) + (amount > 0 ? amount : 0);
+                const newDebit = (currentData.debit || 0) + (amount < 0 ? Math.abs(amount) : 0);
+
+                await updateDoc(customerDocRef, {
+                    credit: newCredit,
+                    debit: newDebit
+                });
+                showToast("Balance adjusted successfully!");
+                adjustModal.classList.add('hidden');
+                adjustAmountInput.value = '';
+            } catch (error) {
+                console.error("Error adjusting balance: ", error);
+                showToast("Failed to adjust balance. Please try again.");
+            }
+        });
+        
+        // Export to CSV function
+        function exportTableToCsv(tableId, filename) {
+            const table = document.getElementById(tableId);
+            const rows = table.querySelectorAll('tr');
+            let csv = [];
+            
+            // Get table headers (from thead)
+            const headerRow = table.closest('table').querySelector('thead tr');
+            if (headerRow) {
+                const headers = Array.from(headerRow.querySelectorAll('th'))
+                                   .map(th => `"${th.textContent.trim()}"`)
+                                   .join(',');
+                csv.push(headers);
+            }
+
+            // Get table data (from tbody)
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const cols = row.querySelectorAll('td');
+                if (cols.length > 0) {
+                    const rowData = Array.from(cols)
+                                       .map(td => `"${td.textContent.trim()}"`)
+                                       .join(',');
+                    csv.push(rowData);
+                }
+            }
+
+            const csvString = csv.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("Export successful!");
+        }
+        window.exportTableToCsv = exportTableToCsv;
+
+
+        // Initial setup for mobile view
+        if (window.innerWidth <= 768) {
+            sidebar.classList.remove('active');
+        }
+
+    </script>
+</body>
+</html>
